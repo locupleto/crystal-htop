@@ -1,16 +1,13 @@
 #!/bin/bash
-# crystal_htop - Enhanced htop clone that logs measurements to file
+#
 # (C) 2024 Urban Ottosson
 # License: GNU General Public License v2 or later (GPLv2+)
 # Repository: https://github.com/locupleto/crystal_htop
 #
-# Description: A variant of htop with file logging functionality. 
-#              Requires 'flock' for managing single instance execution.
-# 
-# This script manages the execution of crystal_htop within a controlled
-# environment, ensuring that only one instance runs at a time and capturing
-# system statistics in separate files. These statistics files will be located
-# in the directory specified by the HTOP_TEMP_DIR environment variable.
+# Description: Example script that manages the execution of crystal_htop within  
+# a flock monitor section, ensuring that only one instance runs at a time and 
+# capturing system statistics in separate files. These statistics files will be 
+# located in the directory specified by the HTOP_TEMP_DIR environment variable.
 
 export HTOP_TEMP_DIR=/tmp
 export HTOPRC=$HTOP_TEMP_DIR/htop_htoprc
@@ -33,14 +30,8 @@ lockfile="$HTOP_TEMP_DIR/crystal_htop.lock"
             # List the current screen sessions to file
             screen -ls > "$HTOP_TEMP_DIR/htop_session_list.txt"
 
-            # Report the total no of CPU cores in the system (e.g. 20)
+            # Optionally report the total no of CPU cores in the system (e.g. 20)
             /usr/sbin/sysctl -n hw.ncpu > "$HTOP_TEMP_DIR/htop_num_cpus.txt"
-
-            # Report type of mac cpu (e.g. 'Apple M1 Ultra')
-            /usr/sbin/sysctl -n machdep.cpu.brand_string > "$HTOP_TEMP_DIR/htop_htop_cpu_brand.txt"
-
-            # Report kernel version
-            /usr/sbin/sysctl -n machdep.cpu.brand_string > "$HTOP_TEMP_DIR/htop_htop_cpu_brand.txt"
 
             # Give htop a second to create the files we rely on next
             sleep 1
