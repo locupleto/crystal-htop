@@ -5,6 +5,20 @@ Released under the GNU GPLv2+, see the COPYING file
 in the source distribution for its full text.
 */
 
+/*
+ * crystal_htop - Additions
+ * 2024-01-13 Urban Ottosson
+ *
+ * This file contains minor additions to the original htop codebase.
+ * These modifications enable htop to log samples of its measurements to a file,
+ * a functionality not provided in the original htop.
+ *
+ * All additions are clearly marked to facilitate easy comparison with
+ * the original code. Search for 'crystal_htop' in the code.
+ *
+ * Repository: https://github.com/locupleto/crystal_htop
+ */
+
 #include "config.h" // IWYU pragma: keep
 
 #include "LoadAverageMeter.h"
@@ -58,6 +72,33 @@ static void LoadAverageMeter_updateValues(Meter* this) {
    }
 
    xSnprintf(this->txtBuffer, sizeof(this->txtBuffer), "%.2f/%.2f/%.2f", this->values[0], this->values[1], this->values[2]);
+
+   /* --- Start of crystal_htop Additions --- */
+   const char* defaultTempDir = "/tmp";
+   const char* tempDir;
+
+   // Attempt to retrieve the value of the HTOP_TEMP_DIR environment variable
+   const char* envTempDir = getenv("HTOP_TEMP_DIR");
+
+   // Check if the environment variable is set
+   if (envTempDir != NULL) 
+      tempDir = envTempDir;
+   else
+      tempDir = defaultTempDir;
+
+   for (int i = 1; i <= 3; i++) {
+      char loadAvgFilePath[256]; 
+      snprintf(loadAvgFilePath, sizeof(loadAvgFilePath), "%s/htop_load_avg_%d.txt", tempDir, i);
+      FILE *file = fopen(loadAvgFilePath, "w"); 
+
+      if (file != NULL) {
+         char doubleBuffer[16] = { 0 };
+         xSnprintf(doubleBuffer, sizeof(doubleBuffer), "%.2f", this->values[i-1]);
+         fprintf(file, "%s", doubleBuffer);
+         fclose(file);  
+      }
+   }
+   /* --- End of crystal_htop Additions --- */
 }
 
 static void LoadAverageMeter_display(const Object* cast, RichString* out) {

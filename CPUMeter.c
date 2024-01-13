@@ -5,6 +5,21 @@ Released under the GNU GPLv2+, see the COPYING file
 in the source distribution for its full text.
 */
 
+/*
+ * crystal_htop - Additions
+ * 2024-01-13 Urban Ottosson
+ *
+ * This file contains minor additions to the original htop codebase.
+ * These modifications enable htop to log samples of its measurements to a file,
+ * a functionality not provided in the original htop.
+ *
+ * All additions are clearly marked to facilitate easy comparison with
+ * the original code. Search for 'crystal_htop' in the code.
+ *
+ * Repository: https://github.com/locupleto/crystal_htop
+ */
+
+
 #include "config.h" // IWYU pragma: keep
 
 #include "CPUMeter.h"
@@ -66,6 +81,22 @@ static void CPUMeter_updateValues(Meter* this) {
    const Machine* host = this->host;
    const Settings* settings = host->settings;
 
+   /* --- Start of crystal_htop Additions --- */
+
+   const char* defaultTempDir = "/tmp";
+   const char* tempDir;
+
+   // Attempt to retrieve the value of the HTOP_TEMP_DIR environment variable
+   const char* envTempDir = getenv("HTOP_TEMP_DIR");
+
+   // Check if the environment variable is set
+   if (envTempDir != NULL) 
+      tempDir = envTempDir;
+   else
+      tempDir = defaultTempDir;
+
+   /* --- End of crystal_htop Additions --- */
+
    unsigned int cpu = this->param;
    if (cpu > host->existingCPUs) {
       xSnprintf(this->txtBuffer, sizeof(this->txtBuffer), "absent");
@@ -83,17 +114,26 @@ static void CPUMeter_updateValues(Meter* this) {
    char cpuTemperatureBuffer[16] = { 0 };
 
    if (settings->showCPUUsage) {
-      xSnprintf(cpuUsageBuffer, sizeof(cpuUsageBuffer), "%.1f%%", percent);
+      /* --- Start of crystal_htop Additions --- */
+      char cpuUsageFilePath[256]; 
+      snprintf(cpuUsageFilePath, sizeof(cpuUsageFilePath), "%s/htop_cpu_%03u.txt", tempDir, cpu);
+      FILE *file = fopen(cpuUsageFilePath, "w"); 
+      xSnprintf(cpuUsageBuffer, sizeof(cpuUsageBuffer), "%.1f", percent);
+      if (file != NULL) {
+         fprintf(file, "%s", cpuUsageBuffer);
+         fclose(file);  
+      } 
+      /* --- End of crystal_htop Additions --- */ 
    }
 
-   if (settings->showCPUFrequency) {
-      double cpuFrequency = this->values[CPU_METER_FREQUENCY];
-      if (isNonnegative(cpuFrequency)) {
-         xSnprintf(cpuFrequencyBuffer, sizeof(cpuFrequencyBuffer), "%4uMHz", (unsigned)cpuFrequency);
-      } else {
-         xSnprintf(cpuFrequencyBuffer, sizeof(cpuFrequencyBuffer), "N/A");
-      }
-   }
+    if (settings->showCPUFrequency) {
+        double cpuFrequency = this->values[CPU_METER_FREQUENCY];
+         if (isNonnegative(cpuFrequency)) {
+               xSnprintf(cpuFrequencyBuffer, sizeof(cpuFrequencyBuffer), "%4uMHz", (unsigned)cpuFrequency);
+         } else {
+               xSnprintf(cpuFrequencyBuffer, sizeof(cpuFrequencyBuffer), "N/A");
+         }
+    }
 
    #ifdef BUILD_WITH_CPU_TEMP
    if (settings->showCPUTemperature) {

@@ -5,6 +5,20 @@ Released under the GNU GPLv2+, see the COPYING file
 in the source distribution for its full text.
 */
 
+/*
+ * crystal_htop - Additions
+ * 2024-01-13 Urban Ottosson
+ *
+ * This file contains minor additions to the original htop codebase.
+ * These modifications enable htop to log samples of its measurements to a file,
+ * a functionality not provided in the original htop.
+ *
+ * All additions are clearly marked to facilitate easy comparison with
+ * the original code. Search for 'crystal_htop' in the code.
+ *
+ * Repository: https://github.com/locupleto/crystal_htop
+ */
+
 #include "config.h" // IWYU pragma: keep
 
 #include "Meter.h"
@@ -502,3 +516,22 @@ const MeterClass BlankMeter_class = {
    .uiName = "Blank",
    .caption = ""
 };
+
+/* --- Start of crystal_htop Additions --- */
+double humanUnitToKibibytes(const char* str) {
+    char *end;
+    double value = strtod(str, &end);  // Convert the initial part of str to double
+
+    // Check which unit is used and multiply by the corresponding factor
+    switch (toupper(*end)) {
+        case 'G': value *= ONE_K;  // Fallthrough for G -> M -> K
+        case 'M': value *= ONE_K;
+        case 'K': break;  // No multiplier needed for kibibytes
+        case '\0': break;  // No unit means default to kibibytes
+        default:  // Unknown unit
+            fprintf(stderr, "Error: Unknown unit '%c' in input '%s'\n", *end, str);
+            return -1;
+    }
+    return value;
+}
+/* --- End of crystal_htop Additions --- */

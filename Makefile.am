@@ -510,3 +510,10 @@ lcov:
 	mkdir -p lcov
 	lcov --capture --directory . --output-file coverage.info
 	genhtml coverage.info --output-directory lcov
+
+# Custom target to copy htop to crystal_htop
+copy_htop: all
+	cp $(builddir)/htop $(builddir)/crystal_htop
+
+# Make the 'all' target depend on 'copy_htop' so it executes afterwards
+all: copy_htop

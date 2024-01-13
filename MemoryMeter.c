@@ -5,6 +5,20 @@ Released under the GNU GPLv2+, see the COPYING file
 in the source distribution for its full text.
 */
 
+/*
+ * crystal_htop - Additions
+ * 2024-01-13 Urban Ottosson
+ *
+ * This file contains minor additions to the original htop codebase.
+ * These modifications enable htop to log samples of its measurements to a file,
+ * a functionality not provided in the original htop.
+ *
+ * All additions are clearly marked to facilitate easy comparison with
+ * the original code. Search for 'crystal_htop' in the code.
+ *
+ * Repository: https://github.com/locupleto/crystal_htop
+ */
+
 #include "config.h" // IWYU pragma: keep
 
 #include "MemoryMeter.h"
@@ -39,6 +53,24 @@ static void MemoryMeter_updateValues(Meter* this) {
    this->values[MEMORY_METER_AVAILABLE] = NAN;
    Platform_setMemoryValues(this);
 
+   /* --- Start of crystal_htop Additions --- */
+   const char* defaultTempDir = "/tmp";
+   const char* tempDir;
+
+   // Attempt to retrieve the value of the htop_TEMP_DIR environment variable
+   const char* envTempDir = getenv("HTOP_TEMP_DIR");
+
+   // Check if the environment variable is set
+   if (envTempDir != NULL) 
+      tempDir = envTempDir;
+   else
+      tempDir = defaultTempDir;
+   char usedMemFilePath[256];
+   char availMemFilePath[256];
+   snprintf(usedMemFilePath, sizeof(usedMemFilePath), "%s/htop_mem_used.txt", tempDir);
+   snprintf(availMemFilePath, sizeof(availMemFilePath), "%s/htop_mem_avail.txt", tempDir);
+   /* --- End of crystal_htop Additions --- */
+
    /* Do not print available memory in bar mode */
    static_assert(MEMORY_METER_AVAILABLE + 1 == MEMORY_METER_ITEMCOUNT,
       "MEMORY_METER_AVAILABLE is not the last item in MemoryMeterValues");
@@ -52,11 +84,30 @@ static void MemoryMeter_updateValues(Meter* this) {
       used += this->values[MEMORY_METER_COMPRESSED];
 
    written = Meter_humanUnit(buffer, used, size);
+   
+   /* --- Start of crystal_htop Additions --- */
+   FILE *file = fopen(usedMemFilePath, "w"); 
+   if (file != NULL) {
+      double kibibytes = humanUnitToKibibytes(buffer);
+      fprintf(file, "%f %s", kibibytes, buffer);
+      fclose(file);
+   }
+   /* --- End of crystal_htop Additions --- */
+
    METER_BUFFER_CHECK(buffer, size, written);
 
    METER_BUFFER_APPEND_CHR(buffer, size, '/');
 
    Meter_humanUnit(buffer, this->total, size);
+
+   /* --- Start of crystal_htop Additions --- */
+   file = fopen(availMemFilePath, "w"); 
+   if (file != NULL) {
+      double kibibytes = humanUnitToKibibytes(buffer);
+      fprintf(file, "%f %s", kibibytes, buffer);
+      fclose(file);  
+   }
+   /* --- End of crystal_htop Additions --- */
 }
 
 static void MemoryMeter_display(const Object* cast, RichString* out) {

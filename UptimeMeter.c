@@ -5,6 +5,20 @@ Released under the GNU GPLv2+, see the COPYING file
 in the source distribution for its full text.
 */
 
+/*
+ * crystal_htop - Additions
+ * 2024-01-13 Urban Ottosson
+ *
+ * This file contains minor additions to the original htop codebase.
+ * These modifications enable htop to log samples of its measurements to a file,
+ * a functionality not provided in the original htop.
+ *
+ * All additions are clearly marked to facilitate easy comparison with
+ * the original code. Search for 'crystal_htop' in the code.
+ *
+ * Repository: https://github.com/locupleto/crystal_htop
+ */
+
 #include "config.h" // IWYU pragma: keep
 
 #include "UptimeMeter.h"
@@ -44,6 +58,29 @@ static void UptimeMeter_updateValues(Meter* this) {
       daysbuf[0] = '\0';
    }
    xSnprintf(this->txtBuffer, sizeof(this->txtBuffer), "%s%02d:%02d:%02d", daysbuf, hours, minutes, seconds);
+ 
+   /* --- Start of crystal_htop Additions --- */
+   const char* defaultTempDir = "/tmp";
+   const char* tempDir;
+
+   // Attempt to retrieve the value of the HTOP_TEMP_DIR environment variable
+   const char* envTempDir = getenv("HTOP_TEMP_DIR");
+
+   // Check if the environment variable is set
+   if (envTempDir != NULL) 
+      tempDir = envTempDir;
+   else
+      tempDir = defaultTempDir;
+
+   char uptimeFilePath[256]; 
+   snprintf(uptimeFilePath, sizeof(uptimeFilePath), "%s/htop_uptime_.txt", tempDir);
+   FILE *file = fopen(uptimeFilePath, "w"); 
+
+   if (file != NULL) {
+      fprintf(file, "%s", this->txtBuffer);
+      fclose(file);  
+   }
+   /* --- End of crystal_htop Additions --- */
 }
 
 const MeterClass UptimeMeter_class = {

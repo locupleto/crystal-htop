@@ -160,4 +160,6 @@ extern const MeterMode* const Meter_modes[];
 
 extern const MeterClass BlankMeter_class;
 
+double humanUnitToKibibytes(const char* str);
+
 #endif
