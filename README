@@ -1,11 +1,10 @@
 
 ## Crystal-htop
 
-An enhanced fork of the classic htop performance monitor tool. This version of the tool writes most of htops metrics to files in real-time. This opens up more ways of using these measurements for other purposes. That is the sole difference between this and its origin project htop.
+An  trivial fork of the classic htop performance monitor tool. This version of the tool writes many of htops metrics to files in real-time. This opens up more ways of using these measurements for other purposes. That is the sole difference between this and its origin project htop.
 
 One use-case for crystal_htop is to run a single instance of crystal_htop in the 
-background using screen and the metrics and statistics can be read from the files that
-crystal_htop continously updates in its designated directory. The directory will by
+background using screen and the metrics and statistics can be read from the files that crystal_htop continously updates in its designated directory. The directory will by
 default be /tmp but can be any other direcory of choice if you define a path to that
 in the $HTOP_TEMP_DIR enviroment variable. See crystal_htop_startup.sh for an example of how this can be done.
 
