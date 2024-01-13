@@ -19,8 +19,8 @@ These files will be created and updated by crystal_htop:
 - htop_session_list.txt
 - htop_uptime_.txt
 
-When it comes to building this project, simply follow the build instructions for 
-htop below. A successful build will result in a crystal_htop binary.
+To build this project, simply follow the build instructions for the original
+htop below. A successful build will result in a **crystal_htop** binary.
 
 ---
 # [![htop logo](htop.png)](https://htop.dev)
