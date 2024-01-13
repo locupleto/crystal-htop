@@ -1,3 +1,30 @@
+
+## Crystal-htop
+
+An enhanced fork of the classic htop performance monitor tool. This version of the tool writes most of htops metrics to files in real-time. This opens up more ways of using these measurements for other purposes. That is the sole difference between this and its origin project htop.
+
+One use-case for crystal_htop is to run a single instance of crystal_htop in the 
+background using screen and the metrics and statistics can be read from the files that
+crystal_htop continously updates in its designated directory. The directory will by
+default be /tmp but can be any other direcory of choice if you define a path to that
+in the $HTOP_TEMP_DIR enviroment variable. See crystal_htop_startup.sh for an example of how this can be done.
+
+These files will be created and updated by crystal_htop:
+- htop_cpu_001.txt - htop_cpu_NNN.txt where NNN is your no of CPU cores
+- htop_load_avg_1.txt, htop_load_avg_2.txt, htop_load_avg_3.txt
+- htop_total_tasks.txt
+- htop_kernel_tasks.txt
+- htop_threads.txt
+- htop_mem_avail.txt, htop_mem_used.txt
+- htop_swap_total.txt, htop_swap_used.txt
+- htop_session_list.txt
+- htop_uptime_.txt
+
+## Build instructions
+
+Simply follow the build instructions for htop. A successful build will result in a crystal_htop binary executable on your platform. 
+---
+
 # [![htop logo](htop.png)](https://htop.dev)
 
 [![CI](https://github.com/htop-dev/htop/workflows/CI/badge.svg)](https://github.com/htop-dev/htop/actions)
